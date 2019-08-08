@@ -1,90 +1,78 @@
 import {connect} from 'react-redux';
 import React from 'react';
-import {Formik, Field, Form, ErrorMessage} from 'formik';
+import {Formik} from 'formik';
+import {FormStyle, FieldStyle, LabelStyle, ButtonStyle, InvalidFeedbackStyle} from '../assets/styles/styles';
+import * as Yup from 'yup';
+import {onAddUserInfo} from '../actions/MainActions';
 
-class Basic extends React.Component {
+const Basic = (props) =>{
 
-    render() {
+        const {
+            firstName,
+            lastName,
+            email
+        } = props.appStore.uresInfo[0];
 
         return (
             <Formik
                 initialValues={{
-                    firstName: this.props.appStore.uresInfo[0].firstName || '',
-                    lastName: this.props.appStore.uresInfo[0].lastName || '',
-                    email: this.props.appStore.uresInfo[0].email || ''
+                    firstName: firstName || '',
+                    lastName: lastName || '',
+                    email: email || ''
                 }}
 
-                validate={values => {
-                    let errors = {};
-                    if (!values.firstName) {
-                        errors.firstName = 'Required field';
-                    }
-
-                    if (!values.lastName) {
-                        errors.lastName = 'Required field';
-                    }
-
-                    if (!values.email) {
-                        errors.email = 'Required field';
-                    }
-                    else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-                        errors.email = 'Invalid email address';
-                    }
-
-                    return errors;
-                }}
+                validationSchema={Yup.object().shape({
+                    firstName: Yup.string()
+                        .required('Required field'),
+                    lastName: Yup.string()
+                        .required('Required field'),
+                    email: Yup.string()
+                        .email('Invalid email address')
+                        .required('Required field'),
+                })}
 
                 onSubmit = {(values) => {
-                    this.props.onAddUserInfo(values);
-                    this.props.router.push('/password');
+                    props.onAddUserInfo(values);
+                    props.router.push('/password');
                 }}
 
                 render={({errors, touched}) => (
-                    <Form className= "form">
+                    <FormStyle >
                         <div className="form-group">
-                            <label className="form-label" htmlFor="firstName">First Name</label>
-                            <Field name="firstName" type="text" className={'form-control' + (errors.firstName && touched.firstName ? ' is-invalid' : '')}/>
-                            <ErrorMessage name="firstName" component="div" className="invalid-feedback"/>
+                            <LabelStyle className="form-label" htmlFor="firstName">First Name</LabelStyle>
+                            <FieldStyle name="firstName" type="text" className={'form-control' + (errors.firstName && touched.firstName ? ' is-invalid' : '')}/>
+                            <InvalidFeedbackStyle name="firstName" component="div" className="invalid-feedback"/>
                         </div>
                         <div className="form-group">
-                            <label className="form-label" htmlFor="lastName">Last Name</label>
-                            <Field name="lastName" type="text" className={'form-control' + (errors.lastName && touched.lastName ? ' is-invalid' : '')}/>
-                            <ErrorMessage name="lastName" component="div" className="invalid-feedback"/>
+                            <LabelStyle className="form-label" htmlFor="lastName">Last Name</LabelStyle>
+                            <FieldStyle name="lastName" type="text" className={'form-control' + (errors.lastName && touched.lastName ? ' is-invalid' : '')}/>
+                            <InvalidFeedbackStyle name="lastName" component="div" className="invalid-feedback"/>
                         </div>
                         <div className="form-group">
-                            <label className="form-label" htmlFor="email">Email</label>
-                            <Field name="email" type="text" className={'form-control' + (errors.email && touched.email ? ' is-invalid' : '')}/>
-                            <ErrorMessage name="email" component="div" className="invalid-feedback"/>
+                            <LabelStyle className="form-label" htmlFor="email">Email</LabelStyle>
+                            <FieldStyle name="email" type="text" className={'form-control' + (errors.email && touched.email ? ' is-invalid' : '')}/>
+                            <InvalidFeedbackStyle name="email" component="div" className="invalid-feedback"/>
                         </div>
                         <div className="form-group">
-                            <button type="submit" className="simple-button">Continue</button>
+                            <ButtonStyle type="submit" className="simple-button">Continue</ButtonStyle>
                         </div>
-                    </Form>
+                    </FormStyle>
                 )}
             />
         )
-    }
-}
+};
 
+const mapStateToProps = state => ({
+    appStore: state
+});
+
+const mapDispatchToProps = dispatch => ({
+     onAddUserInfo: obj => {dispatch(onAddUserInfo(obj))}
+});
 
 export default connect(
-    state => ({
-        appStore: state
-    }),
-    dispatch => ({
-        onAddUserInfo: (obj) => {
+    mapStateToProps,
+    mapDispatchToProps
+)(Basic)
 
-            const payload = {
-                id: Date.now().toString(),
-                firstName: obj["firstName"],
-                lastName: obj["lastName"],
-                email: obj["email"]
-            };
 
-            dispatch({type: 'ADD_USER', payload});
-        },
-        onAddPAssword: () => {
-            dispatch({type: 'ADD_PASSWORD'});
-        }
-    })
-)(Basic);

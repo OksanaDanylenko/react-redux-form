@@ -1,79 +1,79 @@
 import {connect} from 'react-redux';
 import React from 'react';
-import {Formik, Field, Form, ErrorMessage} from 'formik';
+import {Formik} from 'formik';
+import {FormStyle, FieldStyle, LabelStyle, ButtonStyle, ControlButtonStyle, InvalidFeedbackStyle} from '../assets/styles/styles';
+import * as Yup from 'yup';
+import {onAddPAssword} from "../actions/MainActions";
 
-class PasswordControl extends React.Component {
+const PasswordControl = (props) => {
 
-    goBack = () => {
-        this.props.router.push('/');
+    const {
+        firstName,
+        lastName,
+        email
+    } = props.appStore.uresInfo[0];
+
+    const goBack = () => {
+        props.router.push('/');
     };
 
-    render() {
+    return (
+        <Formik
+            initialValues={{
+                password: '',
+                confirmPassword: ''
+            }}
 
-        return (
-            <Formik
-                initialValues={{
-                    password: '',
-                    confirmPassword: ''
-                }}
+            validationSchema={Yup.object().shape({
+                password: Yup.string()
+                    .min(6, 'Should be more than 5 symbols')
+                    .required('Required field'),
+                confirmPassword:  Yup.string()
+                    .oneOf([Yup.ref('password'), null], 'Password doesn\'t match')
+                    .required('Required field')
+            })}
 
-                validate={values => {
-                    let errors = {};
+            onSubmit={(values) => {
+                props.onAddPAssword(values);
+                console.log('FirstName: ' + firstName);
+                console.log('LastName: ' + lastName);
+                console.log('Email: ' + email);
+                console.log('Password: ' + values.password);
+            }}
 
-                    if (values.password.length < 6) {
-                        errors.password = 'Should be more than 5 symbols';
-                    }
-                    else if (values.confirmPassword !== values.password) {
-                        errors.confirmPassword = 'Password doesn\'t match';
-                    }
+            render={({errors, touched}) => (
+                <FormStyle className="form">
+                    <div className="form-group">
+                        <LabelStyle className="form-label" htmlFor="password">Password</LabelStyle>
+                        <FieldStyle name="password" type="password"
+                               className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')}/>
+                        <InvalidFeedbackStyle name="password" component="div" className="invalid-feedback"/>
+                    </div>
+                    <div className="form-group">
+                        <LabelStyle className="form-label" htmlFor="confirmPassword">Confirm Password</LabelStyle>
+                        <FieldStyle name="confirmPassword" type="password"
+                               className={'form-control' + (errors.confirmPassword && touched.confirmPassword ? ' is-invalid' : '')}/>
+                        <InvalidFeedbackStyle name="confirmPassword" component="div" className="invalid-feedback"/>
+                    </div>
+                    <ControlButtonStyle className="form-group control-button">
+                        <ButtonStyle type="submit" className="register simple-button">Register</ButtonStyle>
+                        <ButtonStyle onClick={goBack} className="simple-button">Back</ButtonStyle>
+                    </ControlButtonStyle>
+                </FormStyle>
+            )}
+        />
+    )
+};
 
-                    return errors;
-                }}
+const mapStateToProps = state => ({
+    appStore: state
+});
 
-
-                onSubmit={(values) => {
-                    this.props.onAddPAssword(values);
-                    console.log('FirstName: ' + this.props.appStore.uresInfo[0].firstName);
-                    console.log('LastName: ' + this.props.appStore.uresInfo[0].lastName);
-                    console.log('Email: ' + this.props.appStore.uresInfo[0].email);
-                    console.log('Password: ' + this.props.appStore.passwords[0].password);
-                }}
-
-                render={({errors, touched}) => (
-                    <Form className="form">
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="password">Password</label>
-                            <Field name="password" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')}/>
-                            <ErrorMessage name="password" component="div" className="invalid-feedback"/>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="confirmPassword">Confirm Password</label>
-                            <Field name="confirmPassword" type="password" className={'form-control' + (errors.confirmPassword && touched.confirmPassword ? ' is-invalid' : '')}/>
-                            <ErrorMessage name="confirmPassword" component="div" className="invalid-feedback"/>
-                        </div>
-                        <div className="form-group control-button">
-                            <button type="submit" className="register simple-button">Register</button>
-                            <button onClick={this.goBack} className="simple-button">Back</button>
-                        </div>
-                    </Form>
-                )}
-            />
-        )
-    }
-}
+const mapDispatchToProps = dispatch => ({
+    onAddPAssword: pass => {dispatch(onAddPAssword(pass))}
+});
 
 export default connect(
-    state => ({
-        appStore: state
-    }),
-    dispatch => ({
-        onAddPAssword: (pass) => {
-
-            const payload = {
-                password: pass.password
-            };
-
-            dispatch({type: 'ADD_PASSWORD', payload});
-        }
-    })
-)(PasswordControl);
+    mapStateToProps,
+    mapDispatchToProps
+)(PasswordControl)

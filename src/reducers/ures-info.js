@@ -1,3 +1,4 @@
+import * as types from '../constants/ActionTypes';
 const initialState = [
   {
     id: '',
@@ -9,7 +10,10 @@ const initialState = [
 
 export default function uresInfo(state = initialState, action) {
 
-  if (action.type === 'ADD_USER')  return [action.payload];
-
-  return state;
+  switch(action.type) {
+    case types.ADD_USER:
+      return [action.payload];
+    default:
+      return state;
+  }
 }

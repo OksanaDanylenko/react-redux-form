@@ -1,3 +1,4 @@
+import * as types from '../constants/ActionTypes';
 const initialState = [
     {
         password: ''
@@ -6,7 +7,10 @@ const initialState = [
 
 export default function passwordInfo(state = initialState, action) {
 
-    if (action.type === 'ADD_PASSWORD') return [action.payload];
-
-    return state;
+    switch(action.type) {
+        case types.ADD_PASSWORD:
+            return [action.payload];
+        default:
+            return state;
+    }
 }
